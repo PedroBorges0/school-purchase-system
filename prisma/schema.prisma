@@ -1,0 +1,225 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SOLICITANTE
+  DIRETOR
+  COMPRAS
+  FINANCEIRO
+  CONTROLADORIA
+  DIRETOR_GERAL
+  ADMIN
+}
+
+enum RequestStatus {
+  RASCUNHO
+  EM_APROVACAO_DIRETOR
+  EM_ORCAMENTO
+  EM_ANALISE_FINANCEIRA
+  EM_CONTROLADORIA
+  EM_APROVACAO_DIRETOR_GERAL
+  APROVADO_PARA_COMPRA
+  CONCLUIDO
+  RECUSADO
+  CANCELADO
+}
+
+enum ApprovalAction {
+  APROVADO
+  RECUSADO
+  DEVOLVIDO
+  COMENTARIO
+}
+
+enum Category {
+  MATERIAL_ESCRITORIO
+  MATERIAL_LIMPEZA
+  EQUIPAMENTO_TI
+  MOBILIARIO
+  MATERIAL_DIDATICO
+  SERVICOS
+  MANUTENCAO
+  OUTROS
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  role          Role      @default(SOLICITANTE)
+  department    String?
+  active        Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts         Account[]
+  sessions         Session[]
+  purchaseRequests PurchaseRequest[] @relation("RequestedBy")
+  approvals        Approval[]
+  auditLogs        AuditLog[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+model PurchaseRequest {
+  id              String        @id @default(cuid())
+  code            String        @unique
+  title           String
+  category        Category
+  description     String        @db.Text
+  quantity        Int
+  unit            String        @default("un")
+  justification   String        @db.Text
+  productUrl      String?
+  estimatedValue  Decimal?      @db.Decimal(10, 2)
+  expectedUseDate DateTime?
+  status          RequestStatus @default(RASCUNHO)
+  currentStep     Int           @default(1)
+  requiresDG      Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  requestedById String
+  requestedBy   User   @relation("RequestedBy", fields: [requestedById], references: [id])
+
+  approvals   Approval[]
+  quotes      Quote[]
+  attachments Attachment[]
+  auditLogs   AuditLog[]
+
+  @@map("purchase_requests")
+}
+
+model Approval {
+  id        String         @id @default(cuid())
+  action    ApprovalAction
+  step      Int
+  stepName  String
+  comment   String?        @db.Text
+  createdAt DateTime       @default(now())
+
+  requestId String
+  request   PurchaseRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@map("approvals")
+}
+
+model Quote {
+  id               String   @id @default(cuid())
+  supplierName     String
+  supplierContact  String?
+  supplierEmail    String?
+  totalValue       Decimal  @db.Decimal(10, 2)
+  unitValue        Decimal? @db.Decimal(10, 2)
+  paymentTerms     String?
+  deliveryDays     Int?
+  deliveryLocation String?
+  productUrl       String?
+  notes            String?  @db.Text
+  isSelected       Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  requestId   String
+  request     PurchaseRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  attachments Attachment[]
+
+  @@map("quotes")
+}
+
+model Attachment {
+  id        String   @id @default(cuid())
+  filename  String
+  url       String
+  mimeType  String
+  size      Int
+  createdAt DateTime @default(now())
+
+  requestId String?
+  request   PurchaseRequest? @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  quoteId String?
+  quote   Quote?  @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+
+  @@map("attachments")
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  action     String
+  entityType String
+  entityId   String
+  oldValue   Json?
+  newValue   Json?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  requestId String?
+  request   PurchaseRequest? @relation(fields: [requestId], references: [id])
+
+  @@map("audit_logs")
+}
+
+model SystemConfig {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+
+  @@map("system_config")
+}
