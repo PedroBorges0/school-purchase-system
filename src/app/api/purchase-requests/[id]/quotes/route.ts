@@ -75,11 +75,13 @@ export async function POST(
         data: {
           requestId: params.id,
           supplierName: q.supplierName,
-          totalValue: q.totalValue,
+          totalValue: Number(q.totalValue),
+
           paymentTerms: q.paymentTerms || null,
-          deliveryTime: q.deliveryTime || null,
+          deliveryDays: q.deliveryTime ? Number(q.deliveryTime) : null,
           productUrl: q.productUrl || null,
           notes: q.notes || null,
+
           isSelected: selectedQuoteIndex === i,
         },
       });
