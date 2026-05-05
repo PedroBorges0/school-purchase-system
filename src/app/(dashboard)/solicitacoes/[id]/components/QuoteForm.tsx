@@ -14,6 +14,7 @@ type QuoteInput = {
 
 export default function QuoteForm({ requestId }: { requestId: string }) {
   const router = useRouter();
+
   const [quotes, setQuotes] = useState<QuoteInput[]>([
     {
       supplierName: "",
@@ -24,6 +25,7 @@ export default function QuoteForm({ requestId }: { requestId: string }) {
       notes: "",
     },
   ]);
+
   const [selectedQuoteIndex, setSelectedQuoteIndex] = useState<number | null>(0);
   const [comment, setComment] = useState("");
   const [loading, setLoading] = useState(false);
@@ -80,24 +82,50 @@ export default function QuoteForm({ requestId }: { requestId: string }) {
       comment,
     };
 
-    const response = await fetch(`/api/purchase-requests/${requestId}/quotes`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
+    try {
+      const response = await fetch(
+        `/api/purchase-requests/${requestId}/quotes`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
-    const data = await response.json();
+      const text = await response.text();
 
-    setLoading(false);
+      let data: any = null;
 
-    if (!response.ok) {
-      setError(data?.error || "Erro ao salvar orçamentos");
-      return;
+      try {
+        data = text ? JSON.parse(text) : null;
+      } catch {
+        console.error("Resposta não era JSON:", text);
+      }
+
+      if (!response.ok) {
+        const message = data?.details || data?.error || text || "Erro ao salvar orçamentos";
+        setError(
+          `Status ${response.status}: ${message}`
+        );
+
+        console.error("Erro ao salvar:", {
+          status: response.status,
+          data,
+          text,
+        });
+
+        return;
+      }
+
+      router.refresh();
+    } catch (err) {
+      console.error("Erro inesperado:", err);
+      setError("Erro inesperado ao enviar orçamentos");
+    } finally {
+      setLoading(false);
     }
-
-    router.refresh();
   }
 
   return (
@@ -108,9 +136,14 @@ export default function QuoteForm({ requestId }: { requestId: string }) {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {quotes.map((quote, index) => (
-          <div key={index} className="border border-slate-200 rounded-xl p-4 space-y-4">
+          <div
+            key={index}
+            className="border border-slate-200 rounded-xl p-4 space-y-4"
+          >
             <div className="flex items-center justify-between">
-              <h3 className="font-medium text-slate-900">Orçamento {index + 1}</h3>
+              <h3 className="font-medium text-slate-900">
+                Orçamento {index + 1}
+              </h3>
 
               <div className="flex items-center gap-3">
                 <label className="text-sm text-slate-600 flex items-center gap-2">
@@ -140,7 +173,9 @@ export default function QuoteForm({ requestId }: { requestId: string }) {
                 className="w-full border border-slate-300 rounded-lg px-3 py-2"
                 placeholder="Fornecedor"
                 value={quote.supplierName}
-                onChange={(e) => updateQuote(index, "supplierName", e.target.value)}
+                onChange={(e) =>
+                  updateQuote(index, "supplierName", e.target.value)
+                }
                 required
               />
 
@@ -151,7 +186,9 @@ export default function QuoteForm({ requestId }: { requestId: string }) {
                 className="w-full border border-slate-300 rounded-lg px-3 py-2"
                 placeholder="Valor total"
                 value={quote.totalValue}
-                onChange={(e) => updateQuote(index, "totalValue", e.target.value)}
+                onChange={(e) =>
+                  updateQuote(index, "totalValue", e.target.value)
+                }
                 required
               />
 
@@ -159,23 +196,29 @@ export default function QuoteForm({ requestId }: { requestId: string }) {
                 className="w-full border border-slate-300 rounded-lg px-3 py-2"
                 placeholder="Condição de pagamento"
                 value={quote.paymentTerms}
-                onChange={(e) => updateQuote(index, "paymentTerms", e.target.value)}
+                onChange={(e) =>
+                  updateQuote(index, "paymentTerms", e.target.value)
+                }
               />
 
               <input
                 className="w-full border border-slate-300 rounded-lg px-3 py-2"
                 placeholder="Prazo / entrega"
                 value={quote.deliveryTime}
-                onChange={(e) => updateQuote(index, "deliveryTime", e.target.value)}
+                onChange={(e) =>
+                  updateQuote(index, "deliveryTime", e.target.value)
+                }
               />
             </div>
 
             <input
               type="url"
               className="w-full border border-slate-300 rounded-lg px-3 py-2"
-              placeholder="Link do orçamento / produto"
+              placeholder="Link do orçamento"
               value={quote.productUrl}
-              onChange={(e) => updateQuote(index, "productUrl", e.target.value)}
+              onChange={(e) =>
+                updateQuote(index, "productUrl", e.target.value)
+              }
             />
 
             <textarea
@@ -183,7 +226,9 @@ export default function QuoteForm({ requestId }: { requestId: string }) {
               className="w-full border border-slate-300 rounded-lg px-3 py-2"
               placeholder="Observações"
               value={quote.notes}
-              onChange={(e) => updateQuote(index, "notes", e.target.value)}
+              onChange={(e) =>
+                updateQuote(index, "notes", e.target.value)
+              }
             />
           </div>
         ))}
@@ -192,7 +237,7 @@ export default function QuoteForm({ requestId }: { requestId: string }) {
           <button
             type="button"
             onClick={addQuote}
-            className="bg-slate-100 text-slate-700 px-4 py-2 rounded-lg hover:bg-slate-200"
+            className="bg-slate-100 text-slate-700 px-4 py-2 rounded-lg"
           >
             + Adicionar orçamento
           </button>
@@ -205,7 +250,6 @@ export default function QuoteForm({ requestId }: { requestId: string }) {
           <textarea
             rows={3}
             className="w-full border border-slate-300 rounded-lg px-3 py-2"
-            placeholder="Comentário opcional"
             value={comment}
             onChange={(e) => setComment(e.target.value)}
           />
@@ -216,9 +260,9 @@ export default function QuoteForm({ requestId }: { requestId: string }) {
         <button
           type="submit"
           disabled={loading}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-60"
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg"
         >
-          {loading ? "Salvando..." : "Salvar orçamentos e enviar ao Financeiro"}
+          {loading ? "Salvando..." : "Salvar e enviar ao Financeiro"}
         </button>
       </form>
     </div>
