@@ -64,9 +64,6 @@ export async function GET(
     return NextResponse.json({ error: "Solicitação não encontrada" }, { status: 404 });
   }
 
-  return NextResponse.json(request);
-
-
   const isOwner = request.requestedById === session.user.id;
   const privilegedRoles: Role[] = [
     Role.ADMIN,
@@ -80,5 +77,8 @@ export async function GET(
   if (!isOwner && !privilegedRoles.includes(session.user.role)) {
     return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
   }
+  
+
+  return NextResponse.json(request);
 
 }

@@ -126,7 +126,8 @@ export async function POST(
     newStatus: nextStatus,
     action,
     comment,
-    actorName: session.user.name,
+    actorName: session.user.name || session.user.email || "Usuário",
+  
   });
 
   const nextRole = getRoleForStatus(nextStatus);

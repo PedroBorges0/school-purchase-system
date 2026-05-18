@@ -190,7 +190,21 @@ export default async function DashboardPage() {
 
 // COMPONENTES (mantidos iguais)
 
-function StatCard({ label, value, color, icon, href }: any) {
+type CardColor = "blue" | "yellow" | "green" | "red";
+
+function StatCard({
+  label,
+  value,
+  color,
+  icon,
+  href,
+}: {
+  label: string;
+  value: number;
+  color: CardColor;
+  icon: string;
+  href?: string;
+}) {
   const colors = {
     blue: "bg-blue-50 border-blue-200 text-blue-700",
     yellow: "bg-yellow-50 border-yellow-200 text-yellow-700",
@@ -228,7 +242,7 @@ function StatusBadge({ status }: { status: RequestStatus }) {
 
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${colorMap[color]}`}
+      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${colorMap[color]}`}
     >
       {STATUS_LABELS[status]}
     </span>

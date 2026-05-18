@@ -1,5 +1,5 @@
-// src/lib/audit.ts
-import { prisma } from "./prisma";
+import { Prisma } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 
 interface AuditLogInput {
   userId: string;
@@ -19,15 +19,14 @@ export async function createAuditLog(input: AuditLogInput) {
         action: input.action,
         entityType: input.entityType,
         entityId: input.entityId,
-        oldValue: input.oldValue ?? null,
-        newValue: input.newValue ?? null,
-        metadata: input.metadata ?? null,
+        oldValue: input.oldValue ?? Prisma.JsonNull,
+        newValue: input.newValue ?? Prisma.JsonNull,
+        metadata: input.metadata ?? Prisma.JsonNull,
         userId: input.userId,
         requestId: input.requestId ?? null,
       },
     });
   } catch (error) {
-    // Nunca lança erro — auditoria não deve quebrar o fluxo principal
     console.error("[AUDIT] Falha ao registrar log:", error);
   }
 }

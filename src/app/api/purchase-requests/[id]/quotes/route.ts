@@ -10,7 +10,7 @@ const quoteSchema = z.object({
   supplierName: z.string().min(2, "Fornecedor obrigatório"),
   totalValue: z.number().positive("Valor deve ser maior que zero"),
   paymentTerms: z.string().optional(),
-  deliveryTime: z.string().optional(),
+  deliveryDays: z.number().int().positive().optional(),
   productUrl: z.string().url().optional().or(z.literal("")),
   notes: z.string().optional(),
 });
@@ -24,15 +24,15 @@ const saveQuotesSchema = z.object({
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
-) {
+  ) {
   const { id } = await params;
-
+  const session = await auth();
   if (!session) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 
-  if (![Role.COMPRAS, Role.ADMIN].includes(session.user.role)) {
-    return NextResponse.json({ error: "Sem permissão" }, { status: 403 });
+  if (session.user.role !== Role.COMPRAS && session.user.role !== Role.ADMIN) {
+      return NextResponse.json({ error: "Sem permissão" }, { status: 403 });
   }
 
   const request = await prisma.purchaseRequest.findUnique({
@@ -79,7 +79,7 @@ export async function POST(
           supplierName: q.supplierName,
           totalValue: q.totalValue,
           paymentTerms: q.paymentTerms || null,
-          deliveryTime: q.deliveryTime || null,
+          deliveryDays: q.deliveryDays || null,
           productUrl: q.productUrl || null,
           notes: q.notes || null,
           isSelected: selectedQuoteIndex === i,
@@ -135,7 +135,7 @@ export async function POST(
     newStatus: RequestStatus.EM_ANALISE_FINANCEIRA,
     action: ApprovalAction.APROVADO,
     comment: comment || "Orçamentos registrados e enviados ao Financeiro",
-    actorName: session.user.name,
+    actorName: session.user.name || session.user.email || "Usuário",
   });
 
   // Notify the next actor (Financeiro) that the request is awaiting their analysis

@@ -4,6 +4,7 @@ import { STATUS_COLORS, STATUS_LABELS, canUserActOnRequest } from "@/lib/workflo
 import { notFound, redirect } from "next/navigation";
 import ApprovalActions from "./components/ApprovalActions";
 import QuoteForm from "./components/QuoteForm";
+import { RequestStatus } from "@prisma/client";
 
 export default async function SolicitacaoDetalhePage({
   params,
@@ -222,7 +223,7 @@ function Info({ label, value }: { label: string; value: string }) {
   );
 }
 
-function StatusBadge({ status }: { status: string }) {
+function StatusBadge({ status }: { status: RequestStatus }) {
   const colorMap: Record<string, string> = {
     gray: "bg-gray-100 text-gray-700",
     yellow: "bg-yellow-100 text-yellow-700",
