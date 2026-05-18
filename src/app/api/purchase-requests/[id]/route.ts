@@ -65,7 +65,7 @@ export async function GET(
   }
 
   return NextResponse.json(request);
-}
+
 
   const isOwner = request.requestedById === session.user.id;
   const privilegedRoles: Role[] = [
