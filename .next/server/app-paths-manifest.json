@@ -1,3 +1,7 @@
 {
-  "/page": "app/page.js"
+  "/login/page": "app/login/page.js",
+  "/(dashboard)/solicitacoes/nova/page": "app/(dashboard)/solicitacoes/nova/page.js",
+  "/(dashboard)/solicitacoes/[id]/page": "app/(dashboard)/solicitacoes/[id]/page.js",
+  "/(dashboard)/pendentes/page": "app/(dashboard)/pendentes/page.js",
+  "/(dashboard)/dashboard/page": "app/(dashboard)/dashboard/page.js"
 }

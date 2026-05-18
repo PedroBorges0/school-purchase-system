@@ -1,102 +1,75 @@
-// prisma/seed.ts
 import { PrismaClient, Role } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("🌱 Iniciando seed do banco...");
+  const password = await bcrypt.hash("123456", 10);
 
   const users = [
     {
-      name: "Administrador",
-      email: "admin@colegio.edu.br",
-      password: "admin123",
-      role: Role.ADMIN,
-      department: "TI",
-    },
-    {
-      name: "João Silva",
-      email: "solicitante@colegio.edu.br",
-      password: "senha123",
+      name: "Solicitante Teste",
+      email: "solicitante@teste.com",
       role: Role.SOLICITANTE,
-      department: "Administrativo",
     },
     {
-      name: "Dra. Maria Santos",
-      email: "diretor@colegio.edu.br",
-      password: "senha123",
+      name: "Diretor",
+      email: "diretor@teste.com",
       role: Role.DIRETOR,
-      department: "Direção",
     },
     {
-      name: "Carlos Compras",
-      email: "compras@colegio.edu.br",
-      password: "senha123",
+      name: "Compras",
+      email: "compras@teste.com",
       role: Role.COMPRAS,
-      department: "Compras",
     },
     {
-      name: "Ana Financeiro",
-      email: "financeiro@colegio.edu.br",
-      password: "senha123",
+      name: "Financeiro",
+      email: "financeiro@teste.com",
       role: Role.FINANCEIRO,
-      department: "Financeiro",
     },
     {
-      name: "Paulo Controladoria",
-      email: "controladoria@colegio.edu.br",
-      password: "senha123",
+      name: "Controladoria",
+      email: "controladoria@teste.com",
       role: Role.CONTROLADORIA,
-      department: "Controladoria",
     },
     {
-      name: "Dir. Roberto Geral",
-      email: "diretorgeral@colegio.edu.br",
-      password: "senha123",
-      role: Role.DIRETOR_GERAL,
-      department: "Direção Geral",
+      name: "Admin",
+      email: "admin@teste.com",
+      role: Role.ADMIN,
     },
   ];
 
-  for (const userData of users) {
-    const hashedPassword = await bcrypt.hash(userData.password, 12);
-
-    await prisma.user.upsert({
-      where: { email: userData.email },
-      update: {},
-      create: {
-        name: userData.name,
-        email: userData.email,
-        password: hashedPassword,
-        role: userData.role,
-        department: userData.department,
-      },
+  for (const user of users) {
+    const exists = await prisma.user.findUnique({
+      where: { email: user.email },
     });
 
-    console.log(`✅ Usuário criado: ${userData.email} (${userData.role})`);
+    if (!exists) {
+      await prisma.user.create({
+        data: {
+          name: user.name,
+          email: user.email,
+          password,
+          role: user.role,
+          active: true,
+        },
+      });
+
+      console.log(`✅ Usuário criado: ${user.email}`);
+    } else {
+      console.log(`ℹ️ Usuário já existe: ${user.email}`);
+    }
   }
-
-  // Config inicial
-  await prisma.systemConfig.upsert({
-    where: { key: "DG_VALUE_THRESHOLD" },
-    update: {},
-    create: { key: "DG_VALUE_THRESHOLD", value: "5000" },
-  });
-
-  console.log("✅ Seed concluído!");
 }
 
 main()
+  .then(() => {
+    console.log("🎉 Seed finalizado!");
+  })
   .catch((e) => {
-    console.error("❌ Erro no seed:", e);
+    console.error(e);
     process.exit(1);
   })
   .finally(async () => {
     await prisma.$disconnect();
-  });
-    await prisma.systemConfig.upsert({
-    where: { key: "PURCHASE_REQUEST_SEQUENCE" },
-    update: {},
-    create: { key: "PURCHASE_REQUEST_SEQUENCE", value: "0" },
   });

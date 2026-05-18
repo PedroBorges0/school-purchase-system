@@ -68,13 +68,13 @@ async function main() {
     },
     {
       name: "Diretor Geral Teste",
-      email: "dg@teste.com",
+      email: "pb20112005@gmail.com",
       role: Role.DIRETOR_GERAL,
       department: "Direção Geral",
     },
     {
       name: "Admin Teste",
-      email: "admin@teste.com",
+      email: "pb20112005@gmail.com",
       role: Role.ADMIN,
       department: "Administração",
     },

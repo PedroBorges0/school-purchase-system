@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createAuditLog } from "@/lib/audit";
-import { RequestStatus, Role } from "@prisma/client";
+import { sendStatusChangeEmail, sendPendingActionEmail } from "@/lib/email";
+import { RequestStatus, Role, ApprovalAction } from "@prisma/client";
 import { z } from "zod";
 
 const quoteSchema = z.object({
@@ -36,6 +37,7 @@ export async function POST(
 
   const request = await prisma.purchaseRequest.findUnique({
     where: { id: params.id },
+    include: { requestedBy: true },
   });
 
   if (!request) {
@@ -122,6 +124,41 @@ export async function POST(
     },
     metadata: { comment },
   });
+
+  // Notify the requester that quotes were submitted and the request advanced
+  await sendStatusChangeEmail({
+    requestId: request.id,
+    requestCode: request.code,
+    requestTitle: request.title,
+    requesterName: request.requestedBy.name,
+    requesterEmail: request.requestedBy.email,
+    newStatus: RequestStatus.EM_ANALISE_FINANCEIRA,
+    action: ApprovalAction.APROVADO,
+    comment: comment || "Orçamentos registrados e enviados ao Financeiro",
+    actorName: session.user.name,
+  });
+
+  // Notify the next actor (Financeiro) that the request is awaiting their analysis
+  const financeiro = await prisma.user.findFirst({
+    where: {
+      active: true,
+      role: Role.FINANCEIRO,
+    },
+    orderBy: { createdAt: "asc" },
+  });
+
+  if (financeiro) {
+    await sendPendingActionEmail({
+      requestId: request.id,
+      requestCode: request.code,
+      requestTitle: request.title,
+      requesterName: request.requestedBy.name,
+      recipientEmail: financeiro.email,
+      recipientName: financeiro.name,
+      newStatus: RequestStatus.EM_ANALISE_FINANCEIRA,
+      role: Role.FINANCEIRO,
+    });
+  }
 
   return NextResponse.json(result);
 }

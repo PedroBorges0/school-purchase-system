@@ -66,15 +66,19 @@ async function safeSendEmail(input: {
   subject: string;
   html: string;
 }) {
+  console.log("[EMAIL] Tentando enviar para:", input.to, "| Assunto:", input.subject); // ← adiciona isso
+  
   if (!process.env.RESEND_API_KEY) {
     console.warn("[EMAIL] RESEND_API_KEY não configurada. E-mail não enviado.");
     return;
   }
 
+  const to = process.env.EMAIL_OVERRIDE ?? input.to; // ← adiciona isso
+
   try {
     await resend.emails.send({
       from: FROM,
-      to: input.to,
+      to,
       subject: input.subject,
       html: input.html,
     });
