@@ -5,7 +5,7 @@ import { Role } from "@prisma/client";
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  params : Promise<{ id: string }>
 ) {
   const session = await auth();
   if (!session) {
@@ -13,7 +13,7 @@ export async function GET(
   }
 
   const request = await prisma.purchaseRequest.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       requestedBy: {
         select: {
