@@ -5,12 +5,14 @@ import { Role } from "@prisma/client";
 
 export async function GET(
   _req: NextRequest,
-  params : Promise<{ id: string }>
+  { params }: { params: { id: string } }
 ) {
   const session = await auth();
   if (!session) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
+
+  const { id } = params; // 🔥 FALTAVA ISSO
 
   const request = await prisma.purchaseRequest.findUnique({
     where: { id },
