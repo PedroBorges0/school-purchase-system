@@ -5,14 +5,14 @@ import { Role } from "@prisma/client";
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth();
   if (!session) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 
-  const { id } = params; // 🔥 FALTAVA ISSO
+  const { id } = await params; // ✅ correto
 
   const request = await prisma.purchaseRequest.findUnique({
     where: { id },
@@ -64,6 +64,9 @@ export async function GET(
     return NextResponse.json({ error: "Solicitação não encontrada" }, { status: 404 });
   }
 
+  return NextResponse.json(request);
+}
+
   const isOwner = request.requestedById === session.user.id;
   const privilegedRoles: Role[] = [
     Role.ADMIN,
@@ -78,5 +81,4 @@ export async function GET(
     return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
   }
 
-  return NextResponse.json(request);
 }
