@@ -8,13 +8,15 @@ import QuoteForm from "./components/QuoteForm";
 export default async function SolicitacaoDetalhePage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
+
   const session = await auth();
   if (!session) redirect("/login");
 
   const request = await prisma.purchaseRequest.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       requestedBy: true,
       approvals: {
