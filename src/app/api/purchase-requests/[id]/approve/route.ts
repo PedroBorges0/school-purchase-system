@@ -23,15 +23,17 @@ const approvalSchema = z.object({
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth();
   if (!session) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 
+  const { id } = await params;
+
   const request = await prisma.purchaseRequest.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       requestedBy: true,
       approvals: true,
