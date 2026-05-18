@@ -23,9 +23,9 @@ const saveQuotesSchema = z.object({
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth();
+  const { id } = await params;
 
   if (!session) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
@@ -36,7 +36,7 @@ export async function POST(
   }
 
   const request = await prisma.purchaseRequest.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: { requestedBy: true },
   });
 
@@ -65,7 +65,7 @@ export async function POST(
 
   const result = await prisma.$transaction(async (tx) => {
     await tx.quote.deleteMany({
-      where: { requestId: params.id },
+      where: { requestId: id },
     });
 
     const createdQuotes = [];
@@ -75,7 +75,7 @@ export async function POST(
 
       const created = await tx.quote.create({
         data: {
-          requestId: params.id,
+          requestId: id,
           supplierName: q.supplierName,
           totalValue: q.totalValue,
           paymentTerms: q.paymentTerms || null,
@@ -91,7 +91,7 @@ export async function POST(
 
     const approval = await tx.approval.create({
       data: {
-        requestId: params.id,
+        requestId: id,
         userId: session.user.id,
         action: "APROVADO",
         comment: comment || "Orçamentos registrados e enviados ao Financeiro",
@@ -101,7 +101,7 @@ export async function POST(
     });
 
     const updatedRequest = await tx.purchaseRequest.update({
-      where: { id: params.id },
+      where: { id: id },
       data: {
         status: RequestStatus.EM_ANALISE_FINANCEIRA,
         currentStep: 3,
@@ -115,8 +115,8 @@ export async function POST(
     userId: session.user.id,
     action: "REQUEST_QUOTES_REGISTERED",
     entityType: "PurchaseRequest",
-    entityId: params.id,
-    requestId: params.id,
+    entityId: id,
+    requestId: id,
     newValue: {
       status: RequestStatus.EM_ANALISE_FINANCEIRA,
       quotesCount: quotes.length,
