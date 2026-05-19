@@ -74,7 +74,7 @@ async function main() {
     },
     {
       name: "Admin Teste",
-      email: "pb20112005@gmail.com",
+      email: "admin@teste.com",
       role: Role.ADMIN,
       department: "Administração",
     },
