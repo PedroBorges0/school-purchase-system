@@ -1,154 +1,156 @@
-# School Purchase Workflow System
+# Purchase Workflow System
 
-Sistema web para gestão de requisições de compra com fluxo de aprovação multi-etapas, desenvolvido para digitalizar e padronizar o processo de compras em ambiente escolar.
+Sistema web para gestão de requisições de compra com fluxo de aprovação multi-etapas, desenvolvido e implantado em ambiente escolar real. A aplicação digitaliza e padroniza o processo de compras, substituindo comunicação informal por um fluxo estruturado, rastreável e auditável.
 
----
-
-## Contexto
-
-O processo de requisições de compra em instituições de ensino frequentemente depende de comunicação informal (e-mails, formulários isolados), o que dificulta o controle, a rastreabilidade e a padronização das decisões.
-
-Este projeto foi desenvolvido com o objetivo de centralizar e estruturar esse fluxo, garantindo maior controle operacional e transparência nas etapas de aprovação.
+🔗 **[Ver aplicação em produção](https://school-purchase-system.vercel.app)**
 
 ---
 
-## Objetivo
+## Sobre o Projeto
 
-Fornecer uma aplicação que permita:
+Instituições de ensino frequentemente gerenciam compras por e-mail e formulários isolados, o que dificulta o controle, a rastreabilidade e a padronização das decisões. Este sistema foi desenvolvido para resolver esse problema de forma concreta: centraliza todo o processo em uma única plataforma, com controle de acesso por perfil, histórico completo de decisões e notificações automáticas por e-mail a cada etapa.
 
-* registro estruturado de solicitações de compra
-* definição de fluxo de aprovação baseado em papéis
-* rastreamento completo do histórico de decisões
-* organização da etapa de orçamentos
-* controle de acesso por perfil de usuário
-
----
-
-## Fluxo de Aprovação
-
-O sistema implementa um fluxo sequencial baseado em regras de negócio:
-
-1. Solicitante cria a requisição
-2. Diretor realiza a aprovação inicial
-3. Setor de Compras registra os orçamentos
-4. Financeiro realiza análise
-5. Controladoria valida a requisição
-6. Diretor Geral (quando necessário)
-7. Compras executa a aquisição
-8. Solicitação é concluída
+O projeto está em uso real, com usuários ativos e deploy contínuo via Vercel.
 
 ---
 
 ## Funcionalidades
 
-* Criação e gerenciamento de requisições de compra
-* Workflow de aprovação baseado em estados
-* Registro de múltiplos orçamentos por solicitação
-* Seleção de proposta recomendada
-* Histórico completo de ações (audit trail)
-* Fila de tarefas por usuário ("pendentes para mim")
-* Controle de acesso baseado em papéis (RBAC)
+- Criação e acompanhamento de requisições de compra
+- Fluxo de aprovação sequencial com até 7 etapas configuráveis
+- Aprovação do Diretor Geral ativada automaticamente para valores acima de R$ 5.000
+- Registro de múltiplos orçamentos com seleção da melhor proposta
+- Histórico completo de ações com data, responsável e comentário (audit trail)
+- Fila de tarefas personalizada por perfil ("Aguardando minha ação")
+- Notificações automáticas por e-mail a cada mudança de status
+- Controle de acesso baseado em papéis (RBAC)
+- Dashboard com métricas por usuário
+- Proteção contra ações duplicadas e race conditions em aprovações simultâneas
+
+---
+
+## Fluxo de Aprovação
+
+```
+Solicitante → Diretor → Compras (orçamentos) → Financeiro → Controladoria
+                                                                    ↓
+                                                         [valor ≥ R$ 5.000]
+                                                                    ↓
+                                                           Diretor Geral
+                                                                    ↓
+                                                      Compras (execução) → Concluído
+```
+
+Cada etapa suporta as ações: **Aprovar**, **Recusar**, **Devolver para revisão** e **Comentar**. Toda ação é registrada no histórico com usuário, data e comentário.
 
 ---
 
 ## Perfis de Usuário
 
-* Solicitante
-* Diretor
-* Compras
-* Financeiro
-* Controladoria
-* Diretor Geral
-* Administrador
-
-Cada perfil possui permissões específicas e acesso restrito às etapas correspondentes do fluxo.
+| Perfil | Responsabilidade |
+|---|---|
+| Solicitante | Cria e acompanha suas requisições |
+| Diretor | Aprovação inicial |
+| Compras | Coleta de orçamentos e execução da compra |
+| Financeiro | Análise financeira |
+| Controladoria | Validação e conformidade |
+| Diretor Geral | Aprovação para valores acima do limite |
+| Administrador | Acesso completo ao sistema |
 
 ---
 
-## Tecnologias Utilizadas
+## Stack
 
-* Next.js (App Router)
-* Node.js
-* Prisma ORM
-* PostgreSQL
-* NextAuth (autenticação)
-* Zod (validação de dados)
-* Tailwind CSS
+| Camada | Tecnologia |
+|---|---|
+| Framework | Next.js 15 (App Router) |
+| Linguagem | TypeScript |
+| Banco de dados | PostgreSQL (Supabase) |
+| ORM | Prisma |
+| Autenticação | NextAuth v5 |
+| Validação | Zod |
+| Estilização | Tailwind CSS |
+| E-mail | Resend |
+| Deploy | Vercel |
 
 ---
 
 ## Arquitetura
 
-O sistema foi estruturado com separação clara de responsabilidades:
+O projeto foi estruturado com separação clara de responsabilidades:
 
-* Camada de apresentação (Next.js)
-* APIs REST para operações de negócio
-* Camada de domínio responsável pelo workflow (`workflow.ts`)
-* Persistência via Prisma ORM
-* Módulos auxiliares para autenticação, auditoria e envio de e-mails
+```
+src/
+├── app/
+│   ├── (dashboard)/        # Páginas protegidas (layout com auth)
+│   │   ├── dashboard/      # Visão geral e métricas
+│   │   ├── solicitacoes/   # Listagem, criação e detalhes
+│   │   └── pendentes/      # Fila de tarefas por perfil
+│   ├── api/                # Rotas REST
+│   │   └── purchase-requests/
+│   └── login/
+└── lib/
+    ├── workflow.ts          # Lógica de negócio do fluxo (desacoplada)
+    ├── email.ts             # Templates e envio de notificações
+    ├── audit.ts             # Registro de histórico
+    └── auth.ts              # Configuração de autenticação
+```
 
-A lógica de fluxo de aprovação é centralizada e desacoplada, permitindo manutenção e evolução sem impacto nas demais camadas.
+A lógica do workflow é completamente desacoplada da camada de apresentação e das APIs, o que facilita manutenção, testes e evolução das regras de negócio sem impacto nas demais camadas.
 
 ---
 
-## Controle de Acesso
+## Decisões Técnicas
 
-A aplicação implementa controle de acesso baseado em papéis (RBAC), garantindo que:
+**Workflow centralizado em `workflow.ts`** — toda a lógica de transição de estados, validação de permissões e regras de negócio está em um único módulo. As APIs consomem essa lógica sem duplicá-la.
 
-* usuários só visualizem solicitações relevantes
-* ações sejam permitidas apenas na etapa correta
-* o fluxo siga as regras definidas de negócio
+**Proteção contra race conditions** — aprovações simultâneas são tratadas com verificação de status antes de qualquer atualização no banco, evitando inconsistências.
+
+**Emails não bloqueantes** — o envio de notificações é feito de forma isolada após a transação principal, garantindo que uma falha no envio não afete a operação.
+
+**Audit trail completo** — toda ação no sistema gera um registro imutável com usuário, timestamp, estado anterior e posterior.
 
 ---
 
-## Ambiente de Desenvolvimento
+## Instalação local
 
-### Pré-requisitos
-
-* Node.js
-* PostgreSQL
-
-### Instalação
+**Pré-requisitos:** Node.js 18+, PostgreSQL
 
 ```bash
+# Clone o repositório
+git clone https://github.com/seu-usuario/purchase-system.git
+cd purchase-system
+
+# Instale as dependências
 npm install
+
+# Configure as variáveis de ambiente
+cp .env.example .env
+# Edite o .env com suas credenciais
+
+# Execute as migrations
+npx prisma migrate dev
+
+# Inicie o servidor
 npm run dev
 ```
 
----
-
-## Usuários de Teste
-
-Senha padrão: `123456`
-
-* [solicitante@teste.com](mailto:solicitante@teste.com)
-* [diretor@teste.com](mailto:diretor@teste.com)
-* [compras@teste.com](mailto:compras@teste.com)
-* [financeiro@teste.com](mailto:financeiro@teste.com)
-* [controladoria@teste.com](mailto:controladoria@teste.com)
-* [dg@teste.com](mailto:dg@teste.com)
-* [admin@teste.com](mailto:admin@teste.com)
-
----
-
-## Status do Projeto
-
-Em desenvolvimento contínuo.
-
-As funcionalidades principais do fluxo de requisições e aprovação já estão implementadas. Melhorias futuras incluem otimizações de interface, notificações e recursos analíticos.
-
----
-
-## Possíveis Evoluções
-
-* Deploy em ambiente de produção
-* Integração com serviços de e-mail em tempo real
-* Painéis analíticos e relatórios gerenciais
-* Integração com sistemas financeiros/ERP
-* Notificações em tempo real (WebSocket)
+**Variáveis necessárias:**
+```env
+DATABASE_URL=
+NEXTAUTH_SECRET=
+NEXTAUTH_URL=
+RESEND_API_KEY=
+EMAIL_FROM=
+NEXT_PUBLIC_APP_URL=
+```
 
 ---
 
 ## Autor
 
-Pedro Borges
+**Pedro Borges**
+Desenvolvimento fullstack — Next.js, TypeScript, Node.js, PostgreSQL
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-blue?style=flat&logo=linkedin)](https://linkedin.com/in/pedro-borges-23b0b825b)
+[![GitHub](https://img.shields.io/badge/GitHub-black?style=flat&logo=github)](https://github.com/PedroBorges0)
