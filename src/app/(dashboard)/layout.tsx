@@ -44,14 +44,17 @@ export default async function DashboardLayout({ children }: LayoutProps) {
             <Link href="/dashboard" className="hover:text-blue-600">
               Dashboard
             </Link>
-
             <Link href="/solicitacoes" className="hover:text-blue-600">
               Solicitações
             </Link>
-
             {role !== "SOLICITANTE" && (
               <Link href="/pendentes" className="hover:text-blue-600">
                 Pendentes
+              </Link>
+            )}
+            {role === "ADMIN" && (
+              <Link href="/usuarios" className="hover:text-blue-600">
+                Usuários
               </Link>
             )}
           </nav>
