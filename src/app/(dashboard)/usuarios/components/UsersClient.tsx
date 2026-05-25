@@ -11,7 +11,7 @@ type User = {
   role: Role;
   department: string | null;
   active: boolean;
-  createdAt: string;
+  createdAt: Date | string;
 };
 
 type FormData = {
