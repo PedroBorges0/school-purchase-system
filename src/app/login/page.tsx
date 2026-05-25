@@ -2,6 +2,7 @@
 import { signIn } from "next-auth/react";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -39,6 +40,11 @@ export default function LoginPage() {
       submitting.current = false;
     }
   }
+
+  useEffect(() => {
+  // Limpa storage local de sessão ao chegar no login
+    sessionStorage.clear();
+  }, []);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-100">
