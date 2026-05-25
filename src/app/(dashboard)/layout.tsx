@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Toaster } from "sonner";
+import SignOutButton from "./components/SignOutButton";
 
 interface LayoutProps {
   children: ReactNode;
@@ -69,14 +70,7 @@ export default async function DashboardLayout({ children }: LayoutProps) {
             </p>
           </div>
 
-          <form action="/api/auth/signout" method="post">
-            <button
-              type="submit"
-              className="text-red-600 hover:underline text-xs"
-            >
-              Sair
-            </button>
-          </form>
+          <SignOutButton />
         </div>
       </header>
 
