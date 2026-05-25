@@ -22,8 +22,9 @@ async function requireAdmin() {
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const session = await requireAdmin();
   if (!session) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 403 });
@@ -31,10 +32,9 @@ export async function PATCH(
 
   const body = await req.json();
 
-  // Toggle ativo/inativo
   if (typeof body.active === "boolean") {
     const user = await prisma.user.update({
-      where: { id: params.id },
+      where: { id },
       data: { active: body.active },
       select: {
         id: true,
@@ -49,7 +49,6 @@ export async function PATCH(
     return NextResponse.json(user);
   }
 
-  // Edição completa
   const parsed = updateUserSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
@@ -60,9 +59,8 @@ export async function PATCH(
 
   const { name, email, role, department, password } = parsed.data;
 
-  // Verifica se email já está em uso por outro usuário
   const existing = await prisma.user.findFirst({
-    where: { email, NOT: { id: params.id } },
+    where: { email, NOT: { id } },
   });
   if (existing) {
     return NextResponse.json(
@@ -77,7 +75,7 @@ export async function PATCH(
   }
 
   const user = await prisma.user.update({
-    where: { id: params.id },
+    where: { id },
     data,
     select: {
       id: true,
