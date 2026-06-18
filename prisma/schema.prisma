@@ -66,6 +66,8 @@ model User {
   purchaseRequests PurchaseRequest[] @relation("RequestedBy")
   approvals        Approval[]
   auditLogs        AuditLog[]
+  vehicleRequests  VehicleRequest[]  @relation("VehicleRequests")
+  vehicleReviews   VehicleRequest[]  @relation("VehicleReviewer")
 
   @@map("users")
 }
@@ -222,4 +224,35 @@ model SystemConfig {
   updatedAt DateTime @updatedAt
 
   @@map("system_config")
+}
+
+enum VehicleRequestStatus {
+  PENDENTE
+  AUTORIZADO
+  AUTORIZADO_COM_RECOMENDACOES
+  REPROGRAMAR
+  NAO_AUTORIZADO
+}
+
+model VehicleRequest {
+  id                String               @id @default(cuid())
+  travelDate        DateTime
+  departureTime     String
+  returnTime        String
+  objective         String               @db.Text
+  driver            String
+  otherParticipants String?              @db.Text
+  status            VehicleRequestStatus @default(PENDENTE)
+  managerComment    String?              @db.Text
+  reviewedAt        DateTime?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+
+  requestedById String
+  requestedBy   User   @relation("VehicleRequests", fields: [requestedById], references: [id])
+
+  reviewedById String?
+  reviewedBy   User?   @relation("VehicleReviewer", fields: [reviewedById], references: [id])
+
+  @@map("vehicle_requests")
 }
