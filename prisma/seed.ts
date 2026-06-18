@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 async function main() {
+  await prisma.$executeRawUnsafe("DEALLOCATE ALL");
   const password = await bcrypt.hash("123456", 10);
 
   const users = [

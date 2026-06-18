@@ -53,6 +53,9 @@ export default async function DashboardLayout({ children }: LayoutProps) {
                 Pendentes
               </Link>
             )}
+            <Link href="/veiculo" className="hover:text-blue-600">
+              Veículo
+            </Link>
             {role === "ADMIN" && (
               <Link href="/usuarios" className="hover:text-blue-600">
                 Usuários
