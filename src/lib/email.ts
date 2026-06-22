@@ -177,6 +177,113 @@ export async function sendNewRequestEmail({
   });
 }
 
+const VEHICLE_STATUS_LABELS: Record<string, string> = {
+  PENDENTE: "Pendente",
+  AUTORIZADO: "Autorizado",
+  AUTORIZADO_COM_RECOMENDACOES: "Autorizado com Recomendações",
+  REPROGRAMAR: "Reprogramar",
+  NAO_AUTORIZADO: "Não Autorizado",
+};
+
+interface VehicleRequestEmailProps {
+  requesterName: string;
+  travelDate: string;
+  departureTime: string;
+  returnTime: string;
+  recipientEmail: string;
+  recipientName: string;
+}
+
+interface VehicleReviewEmailProps {
+  requesterName: string;
+  requesterEmail: string;
+  travelDate: string;
+  newStatus: string;
+  managerComment?: string | null;
+  reviewerName: string;
+}
+
+export async function sendVehicleRequestEmail({
+  requesterName,
+  travelDate,
+  departureTime,
+  returnTime,
+  recipientEmail,
+  recipientName,
+}: VehicleRequestEmailProps) {
+  const detailsUrl = `${APP_URL}/veiculo`;
+  const dateFormatted = new Date(travelDate + "T12:00:00").toLocaleDateString("pt-BR");
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <div style="background: #1e40af; padding: 24px; border-radius: 8px 8px 0 0;">
+        <h1 style="color: white; margin: 0; font-size: 20px;">Sistema de Compras — Reserva de Veículo</h1>
+      </div>
+      <div style="padding: 24px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0 0 8px 8px;">
+        <p>Olá, <strong>${recipientName}</strong></p>
+        <p>Uma nova solicitação de reserva de veículo aguarda seu parecer:</p>
+        <div style="background: white; border-left: 4px solid #f59e0b; padding: 16px; border-radius: 4px; margin: 16px 0;">
+          <p style="margin: 0;"><strong>Solicitante:</strong> ${requesterName}</p>
+          <p style="margin: 8px 0 0;"><strong>Data da viagem:</strong> ${dateFormatted}</p>
+          <p style="margin: 8px 0 0;"><strong>Saída:</strong> ${departureTime} &nbsp;|&nbsp; <strong>Devolução prevista:</strong> ${returnTime}</p>
+        </div>
+        <p>
+          <a href="${detailsUrl}" style="display:inline-block;background:#1e40af;color:#fff;text-decoration:none;padding:12px 18px;border-radius:8px;">
+            Ver solicitações
+          </a>
+        </p>
+      </div>
+    </div>
+  `;
+
+  await safeSendEmail({
+    to: recipientEmail,
+    subject: `Nova reserva de veículo — ${requesterName} (${dateFormatted})`,
+    html,
+  });
+}
+
+export async function sendVehicleReviewEmail({
+  requesterName,
+  requesterEmail,
+  travelDate,
+  newStatus,
+  managerComment,
+  reviewerName,
+}: VehicleReviewEmailProps) {
+  const detailsUrl = `${APP_URL}/veiculo`;
+  const dateFormatted = new Date(travelDate + "T12:00:00").toLocaleDateString("pt-BR");
+  const statusLabel = VEHICLE_STATUS_LABELS[newStatus] ?? newStatus;
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <div style="background: #1e40af; padding: 24px; border-radius: 8px 8px 0 0;">
+        <h1 style="color: white; margin: 0; font-size: 20px;">Sistema de Compras — Reserva de Veículo</h1>
+      </div>
+      <div style="padding: 24px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0 0 8px 8px;">
+        <p>Olá, <strong>${requesterName}</strong></p>
+        <p>Sua solicitação de reserva de veículo para <strong>${dateFormatted}</strong> recebeu um parecer:</p>
+        <div style="background: white; border-left: 4px solid #1e40af; padding: 16px; border-radius: 4px; margin: 16px 0;">
+          <p style="margin: 0;"><strong>Parecer:</strong> ${statusLabel}</p>
+          <p style="margin: 8px 0 0;"><strong>Por:</strong> ${reviewerName}</p>
+          ${managerComment ? `<p style="margin: 8px 0 0;"><strong>Observações:</strong> ${managerComment}</p>` : ""}
+        </div>
+        <p>
+          <a href="${detailsUrl}" style="display:inline-block;background:#1e40af;color:#fff;text-decoration:none;padding:12px 18px;border-radius:8px;">
+            Ver minhas reservas
+          </a>
+        </p>
+      </div>
+    </div>
+  `;
+
+  await safeSendEmail({
+    to: requesterEmail,
+    subject: `Parecer na reserva de veículo — ${dateFormatted}: ${statusLabel}`,
+    html,
+  });
+}
+
 export async function sendPendingActionEmail({
   requestId,
   requestCode,

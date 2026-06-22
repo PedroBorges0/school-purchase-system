@@ -16,8 +16,9 @@ export default auth(function middleware(req: NextRequest & { auth: any }) {
 
   // Redireciona para login se não autenticado
   if (!req.auth) {
-    const loginUrl = new URL("/login", req.url);
-    loginUrl.searchParams.set("callbackUrl", pathname);
+    const loginUrl = req.nextUrl.clone();
+    loginUrl.pathname = "/login";
+    loginUrl.search = `?callbackUrl=${encodeURIComponent(pathname)}`;
     return NextResponse.redirect(loginUrl);
   }
 
@@ -25,7 +26,10 @@ export default auth(function middleware(req: NextRequest & { auth: any }) {
 
   // Proteção de rotas admin
   if (pathname.startsWith("/admin") && role !== "ADMIN") {
-    return NextResponse.redirect(new URL("/dashboard", req.url));
+    const dashUrl = req.nextUrl.clone();
+    dashUrl.pathname = "/dashboard";
+    dashUrl.search = "";
+    return NextResponse.redirect(dashUrl);
   }
 
   return NextResponse.next();
