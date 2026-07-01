@@ -4,3 +4,8 @@ node_modules
 .env.local
 .vercel
 .env*.local
+
+# Variaveis de ambiente
+.env
+.env.local
+.env*.local
