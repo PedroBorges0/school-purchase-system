@@ -61,6 +61,9 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
+  failedLoginAttempts Int       @default(0)
+  lockedUntil   DateTime?
+
   accounts         Account[]
   sessions         Session[]
   purchaseRequests PurchaseRequest[] @relation("RequestedBy")

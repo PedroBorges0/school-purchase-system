@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { Role, VehicleRequestStatus } from "@prisma/client";
 import Link from "next/link";
 import VehicleReviewForm from "./components/VehicleReviewForm";
+import VehicleDeleteButton from "./components/VehicleDeleteButton";
 
 const STATUS_LABELS: Record<VehicleRequestStatus, string> = {
   PENDENTE: "Pendente",
@@ -128,8 +129,13 @@ export default async function VeiculoPage() {
                   )}
                 </div>
 
-                <div className="text-xs text-slate-400 whitespace-nowrap">
-                  {new Date(req.createdAt).toLocaleDateString("pt-BR")}
+                <div className="flex flex-col items-end gap-2">
+                  <div className="text-xs text-slate-400 whitespace-nowrap">
+                    {new Date(req.createdAt).toLocaleDateString("pt-BR")}
+                  </div>
+                  {isCompras && (
+                    <VehicleDeleteButton requestId={req.id} />
+                  )}
                 </div>
               </div>
 

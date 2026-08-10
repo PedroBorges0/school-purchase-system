@@ -104,7 +104,7 @@ export function canUserActOnRequest(userRole: Role, status: RequestStatus): bool
 }
 
 export function validateActionForStep(
-  status: RequestStatus,
+  status: RequestStatus, 
   action: ApprovalAction
 ): { valid: boolean; message?: string } {
   const step = getWorkflowStep(status);

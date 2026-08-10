@@ -103,3 +103,35 @@ export async function PATCH(
 
   return NextResponse.json(updated);
 }
+
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await auth();
+  if (!session) {
+    return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  }
+
+  const role = session.user.role as Role;
+  if (role !== Role.COMPRAS && role !== Role.ADMIN) {
+    return NextResponse.json(
+      { error: "Apenas o setor de Compras pode remover uma reserva" },
+      { status: 403 }
+    );
+  }
+
+  const { id } = await params;
+
+  const existing = await prisma.vehicleRequest.findUnique({
+    where: { id },
+  });
+
+  if (!existing) {
+    return NextResponse.json({ error: "Reserva não encontrada" }, { status: 404 });
+  }
+
+  await prisma.vehicleRequest.delete({ where: { id } });
+
+  return NextResponse.json({ success: true });
+}
