@@ -8,7 +8,7 @@ import type { Role } from "@prisma/client";
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: {
-    strategy: "database",
+    strategy: "jwt",
     maxAge: 60 * 60 * 8, // 8 horas
   },
   providers: [
@@ -28,7 +28,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         });
 
         if (!user || !user.password) return null;
-        if (!user.active) return null; // bloqueia usuário inativo
+        if (!user.active) return null;
 
         if (user.lockedUntil && user.lockedUntil > new Date()) {
           return null;
@@ -40,28 +40,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         );
 
         if (!isValidPassword) {
-          // Incrementa tentativas falhas de login
           const attempts = user.failedLoginAttempts + 1;
-          const shouldLock = attempts >= 5; // Bloqueia após 5 tentativas falhas
+          const shouldLock = attempts >= 5;
 
           await prisma.user.update({
             where: { id: user.id },
             data: {
               failedLoginAttempts: attempts,
-              lockedUntil: shouldLock 
-              ? new Date(Date.now() + 15 * 60 * 1000) // Bloqueia por 15 minutos
-              : null, 
+              lockedUntil: shouldLock
+                ? new Date(Date.now() + 15 * 60 * 1000)
+                : null,
             },
           });
+
           return null;
         }
 
         await prisma.user.update({
           where: { id: user.id },
-          data: {
-            failedLoginAttempts: 0,
-            lockedUntil: null,
-          },
+          data: { failedLoginAttempts: 0, lockedUntil: null },
         });
 
         return {
@@ -83,14 +80,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return token;
     },
-    async session({ session, user }) {
-      if(!(user as any).active) {
-        return null as any;
-      }
+    async session({ session, token }) {
       if (session.user) {
-        session.user.id = String(user.id);
-        session.user.role = (user as any).role;
-        session.user.department = (user as any).department;
+        session.user.id = String(token.id);
+        session.user.role = token.role as Role;
+        session.user.department = token.department as string | null;
       }
       return session;
     },
