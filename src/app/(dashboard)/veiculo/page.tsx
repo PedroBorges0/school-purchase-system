@@ -35,7 +35,7 @@ export default async function VeiculoPage() {
       requestedBy: { select: { name: true, department: true } },
       reviewedBy: { select: { name: true } },
     },
-    orderBy: [{ travelDate: "asc" }, { departureTime: "asc" }],
+    orderBy: { createdAt: "desc" },  
   });
 
   return (
