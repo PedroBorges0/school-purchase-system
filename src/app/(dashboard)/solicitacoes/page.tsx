@@ -97,9 +97,14 @@ export default async function SolicitacoesPage() {
                 <th className="px-4 py-3" />
               </tr>
             </thead>
+            
             <tbody className="divide-y divide-slate-100">
               {requests.map((req) => {
                 const color = STATUS_COLORS[req.status] ?? "gray";
+                const CAMPUS_LABELS: Record<string, string> = {
+                  CAMPO_MOURAO: "Campo Mourão",
+                  CIANORTE: "Cianorte",
+                };
                 return (
                   <tr key={req.id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-4 py-3 font-mono text-xs text-slate-500">
@@ -107,6 +112,7 @@ export default async function SolicitacoesPage() {
                     </td>
                     <td className="px-4 py-3">
                       <p className="font-medium text-slate-900 line-clamp-1">{req.title}</p>
+                      <p className="text-xs text-slate-400 mt-0.5">{req.category} · {CAMPUS_LABELS[req.campus]}</p>
                       <p className="text-xs text-slate-400 mt-0.5">{req.category}</p>
                     </td>
                     <td className="px-4 py-3 hidden md:table-cell text-slate-600">

@@ -3,7 +3,7 @@ import Credentials from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import type { Role } from "@prisma/client";
+import type { Role, Campus } from "@prisma/client";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -67,6 +67,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           email: user.email,
           role: user.role,
           department: user.department,
+          campus: user.campus,
         };
       },
     }),
@@ -77,6 +78,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.id = user.id;
         token.role = (user as { role: Role }).role;
         token.department = (user as { department?: string | null }).department;
+        token.campus = (user as { campus?: Campus | null }).campus;
       }
       return token;
     },
@@ -85,6 +87,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.id = String(token.id);
         session.user.role = token.role as Role;
         session.user.department = token.department as string | null;
+        session.user.campus = token.campus as Campus | null;
       }
       return session;
     },

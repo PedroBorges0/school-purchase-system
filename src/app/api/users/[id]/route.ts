@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { Role } from "@prisma/client";
+import { Role, Campus } from "@prisma/client";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 
@@ -11,6 +11,7 @@ const updateUserSchema = z.object({
   role: z.nativeEnum(Role),
   department: z.string().optional(),
   password: z.string().min(6).optional().or(z.literal("")),
+  campus: z.nativeEnum(Campus).nullable().optional(),
 });
 
 async function requireAdmin() {
@@ -44,6 +45,7 @@ export async function PATCH(
         department: true,
         active: true,
         createdAt: true,
+        campus: campus || null,
       },
     });
     return NextResponse.json(user);

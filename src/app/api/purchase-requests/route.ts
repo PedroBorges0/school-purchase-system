@@ -20,7 +20,6 @@ const createRequestSchema = z.object({
   expectedUseDate: z.string().optional(),
 });
 
-
 export async function GET(req: NextRequest) {
   const session = await auth();
   if (!session) {
@@ -68,6 +67,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 
+  // Toda requisição precisa nascer associada a um polo. Sem isso não há
+  // como saber qual Diretor deve aprová-la.
+  if (!session.user.campus) {
+    return NextResponse.json(
+      {
+        error:
+          "Seu usuário não tem um polo (Campo Mourão ou Cianorte) definido. Peça ao administrador para configurar isso no seu cadastro antes de criar uma solicitação.",
+      },
+      { status: 400 }
+    );
+  }
+
   const body = await req.json();
   const parsed = createRequestSchema.safeParse(body);
 
@@ -80,6 +91,7 @@ export async function POST(req: NextRequest) {
 
   const data = parsed.data;
   const requiresDG = checkRequiresDG(data.estimatedValue);
+  const campus = session.user.campus;
 
   const result = await prisma.$transaction(async (tx) => {
     const code = await generateSequentialRequestCode(tx);
@@ -89,6 +101,7 @@ export async function POST(req: NextRequest) {
         code,
         title: data.title,
         category: data.category,
+        campus,
         description: data.description,
         quantity: data.quantity,
         unit: data.unit,
@@ -115,13 +128,15 @@ export async function POST(req: NextRequest) {
     entityType: "PurchaseRequest",
     entityId: result.id,
     requestId: result.id,
-    newValue: { code: result.code, status: result.status },
+    newValue: { code: result.code, status: result.status, campus: result.campus },
   });
 
+  // Busca o Diretor responsável pelo mesmo polo da requisição.
   const director = await prisma.user.findFirst({
     where: {
       active: true,
-      role: { in: [Role.DIRETOR, Role.ADMIN] },
+      role: Role.DIRETOR,
+      campus: result.campus,
     },
     orderBy: { createdAt: "asc" },
   });
@@ -135,6 +150,24 @@ export async function POST(req: NextRequest) {
       recipientEmail: director.email,
       recipientName: director.name,
     });
+  } else {
+    // Rede de segurança: se não há Diretor cadastrado para esse polo,
+    // avisa o Admin em vez de deixar a requisição sem notificar ninguém.
+    const admin = await prisma.user.findFirst({
+      where: { active: true, role: Role.ADMIN },
+      orderBy: { createdAt: "asc" },
+    });
+
+    if (admin) {
+      await sendNewRequestEmail({
+        requestId: result.id,
+        requestCode: result.code,
+        requestTitle: `[Sem Diretor cadastrado para ${result.campus}] ${result.title}`,
+        requesterName: result.requestedBy.name,
+        recipientEmail: admin.email,
+        recipientName: admin.name,
+      });
+    }
   }
 
   return NextResponse.json(result, { status: 201 });

@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { toast } from "sonner";
-import { Role } from "@prisma/client";
+import { Role, Campus } from "@prisma/client";
 
 type User = {
   id: string;
@@ -10,6 +10,7 @@ type User = {
   email: string;
   role: Role;
   department: string | null;
+  campus: Campus | null;
   active: boolean;
   createdAt: Date | string;
 };
@@ -20,6 +21,12 @@ type FormData = {
   password: string;
   role: Role;
   department: string;
+  campus: Campus | "";
+};
+
+const CAMPUS_LABELS: Record<Campus, string> = {
+  CAMPO_MOURAO: "Campo Mourão",
+  CIANORTE: "Cianorte",
 };
 
 const ROLE_LABELS: Record<Role, string> = {
@@ -38,6 +45,7 @@ const emptyForm = (): FormData => ({
   password: "",
   role: Role.SOLICITANTE,
   department: "",
+  campus: "",
 });
 
 export default function UsersClient({ initialUsers }: { initialUsers: User[] }) {
@@ -62,6 +70,7 @@ export default function UsersClient({ initialUsers }: { initialUsers: User[] }) 
       password: "",
       role: user.role,
       department: user.department || "",
+      campus: user.campus || "",
     });
     setModalOpen(true);
   }
@@ -105,6 +114,7 @@ export default function UsersClient({ initialUsers }: { initialUsers: User[] }) 
         email: form.email.trim(),
         role: form.role,
         department: form.department.trim() || undefined,
+        campus: form.campus || null,
       };
 
       if (!editingUser) {
@@ -239,6 +249,9 @@ export default function UsersClient({ initialUsers }: { initialUsers: User[] }) 
                   <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
                     {ROLE_LABELS[user.role]}
                   </span>
+                  {user.campus && (
+                    <p className="text-xs text-slate-400 mt-1">{CAMPUS_LABELS[user.campus]}</p>
+                  )}
                 </td>
                 <td className="px-4 py-3">
                   <span
@@ -339,6 +352,23 @@ export default function UsersClient({ initialUsers }: { initialUsers: User[] }) 
                   disabled={loading}
                 >
                   {Object.entries(ROLE_LABELS).map(([value, label]) => (
+                    <option key={value} value={value}>{label}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Polo <span className="text-slate-400 font-normal">(obrigatório para Solicitante e Diretor)</span>
+                </label>
+                <select
+                  className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white disabled:opacity-50"
+                  value={form.campus}
+                  onChange={(e) => setForm({ ...form, campus: e.target.value as Campus | "" })}
+                  disabled={loading}
+                >
+                  <option value="">Nenhum</option>
+                  {Object.entries(CAMPUS_LABELS).map(([value, label]) => (
                     <option key={value} value={value}>{label}</option>
                   ))}
                 </select>

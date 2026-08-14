@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 enum Role {
@@ -15,6 +16,11 @@ enum Role {
   CONTROLADORIA
   DIRETOR_GERAL
   ADMIN
+}
+
+enum Campus {
+  CAMPO_MOURAO
+  CIANORTE
 }
 
 enum RequestStatus {
@@ -57,6 +63,7 @@ model User {
   password      String?
   role          Role      @default(SOLICITANTE)
   department    String?
+  campus        Campus?    
   active        Boolean   @default(true)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -120,6 +127,7 @@ model PurchaseRequest {
   code            String        @unique
   title           String
   category        Category
+  campus          Campus        @default(CAMPO_MOURAO)
   description     String        @db.Text
   quantity        Int
   unit            String        @default("un")

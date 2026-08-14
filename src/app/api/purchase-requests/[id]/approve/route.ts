@@ -14,7 +14,7 @@ import {
   shouldReturnStep,
   getRoleForStatus,
 } from "@/lib/workflow";
-import { ApprovalAction } from "@prisma/client";
+import { ApprovalAction, Role } from "@prisma/client";
 import { z } from "zod";
 
 const approvalSchema = z.object({
@@ -45,7 +45,14 @@ export async function POST(
     return NextResponse.json({ error: "Não encontrado" }, { status: 404 });
   }
 
-  if (!canUserActOnRequest(session.user.role, request.status)) {
+  if (
+    !canUserActOnRequest(
+      session.user.role,
+      request.status,
+      session.user.campus,
+      request.campus
+    )
+  ) {
     return NextResponse.json(
       { error: "Você não tem permissão para agir nesta etapa" },
       { status: 403 }
@@ -128,16 +135,19 @@ export async function POST(
     action,
     comment,
     actorName: session.user.name || session.user.email || "Usuário",
-  
   });
 
   const nextRole = getRoleForStatus(nextStatus);
 
   if (nextRole && nextStatus !== oldStatus) {
+    // Se a próxima etapa for do Diretor, restringe a busca ao Diretor
+    // do mesmo polo da requisição. Nas demais etapas (time compartilhado
+    // entre os polos), a busca continua sem filtro de campus.
     const nextActor = await prisma.user.findFirst({
       where: {
         active: true,
         role: nextRole,
+        ...(nextRole === Role.DIRETOR ? { campus: request.campus } : {}),
       },
       orderBy: { createdAt: "asc" },
     });

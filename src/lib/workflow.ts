@@ -1,4 +1,4 @@
-import { RequestStatus, Role, ApprovalAction } from "@prisma/client";
+import { RequestStatus, Role, ApprovalAction, Campus } from "@prisma/client";
 
 export interface WorkflowStep {
   status: RequestStatus;
@@ -97,10 +97,24 @@ export function getWorkflowStep(status: RequestStatus): WorkflowStep | null {
   return WORKFLOW_STEPS.find((s) => s.status === status) ?? null;
 }
 
-export function canUserActOnRequest(userRole: Role, status: RequestStatus): boolean {
+export function canUserActOnRequest(
+  userRole: Role,
+  status: RequestStatus,
+  userCampus?: Campus | null,
+  requestCampus?: Campus | null
+): boolean {
   const step = getWorkflowStep(status);
   if (!step) return false;
-  return step.allowedRoles.includes(userRole);
+  if (!step.allowedRoles.includes(userRole)) return false;
+
+  // Na etapa do Diretor, o campus do usuário precisa bater com o da requisição.
+  // As demais etapas (Compras, Financeiro, Controladoria, Diretor Geral) são
+  // compartilhadas entre os polos, sem essa restrição.
+  if (status === RequestStatus.EM_APROVACAO_DIRETOR && userRole === Role.DIRETOR) {
+    return userCampus === requestCampus;
+  }
+
+  return true;
 }
 
 export function validateActionForStep(

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { Role } from "@prisma/client";
+import { Role, Campus } from "@prisma/client";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 
@@ -11,6 +11,7 @@ const createUserSchema = z.object({
   password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
   role: z.nativeEnum(Role),
   department: z.string().optional(),
+  campus: z.nativeEnum(Campus).nullable().optional(),
 });
 
 async function requireAdmin() {
@@ -78,6 +79,7 @@ export async function POST(req: NextRequest) {
       role,
       department: department || null,
       active: true,
+      campus: campus || null
     },
     select: {
       id: true,
