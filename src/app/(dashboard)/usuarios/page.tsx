@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import { Role } from "@prisma/client";
+import { Role, Campus } from "@prisma/client";
 import UsersClient from "./components/UsersClient";
 
 export default async function UsuariosPage() {
@@ -19,6 +19,7 @@ export default async function UsuariosPage() {
       department: true,
       active: true,
       createdAt: true,
+      campus: true,
     },
   });
 

@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
       role,
       department: department || null,
       active: true,
-      campus: campus || null
+      Campus: Campus || null
     },
     select: {
       id: true,

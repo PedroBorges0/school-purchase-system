@@ -45,7 +45,7 @@ export async function PATCH(
         department: true,
         active: true,
         createdAt: true,
-        campus: campus || null,
+        Campus: Campus || null,
       },
     });
     return NextResponse.json(user);
