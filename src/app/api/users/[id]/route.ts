@@ -87,6 +87,7 @@ export async function PATCH(
       department: true,
       active: true,
       createdAt: true,
+      campus: true,
     },
   });
 

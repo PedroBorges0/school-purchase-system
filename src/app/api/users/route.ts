@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { name, email, password, role, department } = parsed.data;
+  const { name, email, password, role, department, campus } = parsed.data;
 
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
       role,
       department: department || null,
       active: true,
-      Campus: Campus || null,
+      campus: campus || null,
     },
     select: {
       id: true,
