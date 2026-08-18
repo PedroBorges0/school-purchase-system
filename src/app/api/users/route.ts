@@ -37,6 +37,7 @@ export async function GET() {
       department: true,
       active: true,
       createdAt: true,
+      campus: true,
     },
   });
 

@@ -59,7 +59,7 @@ export async function PATCH(
     );
   }
 
-  const { name, email, role, department, password } = parsed.data;
+  const { name, email, role, department, password, campus } = parsed.data;
 
   const existing = await prisma.user.findFirst({
     where: { email, NOT: { id } },
@@ -71,7 +71,7 @@ export async function PATCH(
     );
   }
 
-  const data: any = { name, email, role, department: department || null };
+  const data: any = { name, email, role, department: department || null, campus: campus ?? null };
   if (password) {
     data.password = await bcrypt.hash(password, 10);
   }
