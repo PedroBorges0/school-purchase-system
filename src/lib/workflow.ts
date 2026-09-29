@@ -32,7 +32,7 @@ export const WORKFLOW_STEPS: WorkflowStep[] = [
     label: "Registro de Orçamentos",
     stepNumber: 2,
     allowedRoles: [Role.COMPRAS, Role.ADMIN],
-    nextStatus: RequestStatus.EM_ANALISE_FINANCEIRA,
+    nextStatus: RequestStatus.EM_CONTROLADORIA,
     prevStatus: RequestStatus.EM_APROVACAO_DIRETOR,
     canReject: false,
     canReturn: true,
@@ -41,28 +41,28 @@ export const WORKFLOW_STEPS: WorkflowStep[] = [
     requiresCommentOnReturn: true,
   },
   {
-    status: RequestStatus.EM_ANALISE_FINANCEIRA,
-    label: "Análise Financeira",
+    status: RequestStatus.EM_CONTROLADORIA,
+    label: "Controladoria / Procuradoria",
     stepNumber: 3,
-    allowedRoles: [Role.FINANCEIRO, Role.ADMIN],
-    nextStatus: RequestStatus.EM_CONTROLADORIA,
+    allowedRoles: [Role.CONTROLADORIA, Role.ADMIN],
+    nextStatus: RequestStatus.EM_ANALISE_FINANCEIRA,
     prevStatus: RequestStatus.EM_ORCAMENTO,
     canReject: true,
     canReturn: true,
-    requiresCommentOnApprove: true,
+    requiresCommentOnApprove: false,
     requiresCommentOnReject: true,
     requiresCommentOnReturn: true,
   },
   {
-    status: RequestStatus.EM_CONTROLADORIA,
-    label: "Controladoria / Procuradoria",
+    status: RequestStatus.EM_ANALISE_FINANCEIRA,
+    label: "Análise Financeira",
     stepNumber: 4,
-    allowedRoles: [Role.CONTROLADORIA, Role.ADMIN],
+    allowedRoles: [Role.FINANCEIRO, Role.ADMIN],
     nextStatus: RequestStatus.APROVADO_PARA_COMPRA,
-    prevStatus: RequestStatus.EM_ANALISE_FINANCEIRA,
+    prevStatus: RequestStatus.EM_CONTROLADORIA,
     canReject: true,
     canReturn: true,
-    requiresCommentOnApprove: false,
+    requiresCommentOnApprove: true,
     requiresCommentOnReject: true,
     requiresCommentOnReturn: true,
   },
@@ -72,7 +72,7 @@ export const WORKFLOW_STEPS: WorkflowStep[] = [
     stepNumber: 5,
     allowedRoles: [Role.DIRETOR_GERAL, Role.ADMIN],
     nextStatus: RequestStatus.APROVADO_PARA_COMPRA,
-    prevStatus: RequestStatus.EM_CONTROLADORIA,
+    prevStatus: RequestStatus.EM_ANALISE_FINANCEIRA,
     canReject: true,
     canReturn: true,
     requiresCommentOnApprove: false,
@@ -199,19 +199,19 @@ export function resolveNextStatus(
     return step?.prevStatus ?? currentStatus;
   }
 
-  if (
-    currentStatus === RequestStatus.EM_CONTROLADORIA &&
-    action === ApprovalAction.APROVADO &&
-    requiresDG
-  ) {
-    return RequestStatus.EM_APROVACAO_DIRETOR_GERAL;
-  }
+if (
+  currentStatus === RequestStatus.EM_ANALISE_FINANCEIRA &&
+  action === ApprovalAction.APROVADO &&
+  requiresDG
+) {
+  return RequestStatus.EM_APROVACAO_DIRETOR_GERAL;
+}
 
   const step = getWorkflowStep(currentStatus);
   return step?.nextStatus ?? currentStatus;
 }
 
-export const DG_VALUE_THRESHOLD = 5000;
+export const DG_VALUE_THRESHOLD = 3000;
 
 export function checkRequiresDG(estimatedValue?: number | null): boolean {
   if (!estimatedValue) return false;
