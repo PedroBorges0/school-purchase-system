@@ -2,6 +2,7 @@ import { ReactNode, Suspense } from "react";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Toaster } from "sonner";
 import SignOutButton from "./components/SignOutButton";
 
@@ -30,34 +31,41 @@ export default async function DashboardLayout({ children }: LayoutProps) {
   const name = session.user.name ?? "Usuário";
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen" style={{ backgroundColor: "#F0F2F5" }}>
 
       {/* HEADER */}
-      <header className="bg-white border-b px-6 py-3 flex items-center justify-between">
+      <header className="bg-white border-b border-slate-200 px-6 py-2 flex items-center justify-between shadow-sm">
 
-        {/* ESQUERDA */}
-        <div className="flex items-center gap-6">
-          <Link href="/dashboard" className="font-bold text-lg text-slate-800">
-            Sistema de Compras
+        {/* ESQUERDA — logo + nav */}
+        <div className="flex items-center gap-8">
+          <Link href="/dashboard" className="flex items-center gap-3">
+            <Image
+              src="/logo-conexao.png"
+              alt="Colégio Conexão"
+              width={140}
+              height={48}
+              className="object-contain"
+              priority
+            />
           </Link>
 
-          <nav className="flex gap-4 text-sm text-slate-600">
-            <Link href="/dashboard" className="hover:text-blue-600">
+          <nav className="flex gap-5 text-sm font-medium" style={{ color: "#1E3A6E" }}>
+            <Link href="/dashboard" className="hover:opacity-70 transition-opacity">
               Dashboard
             </Link>
-            <Link href="/solicitacoes" className="hover:text-blue-600">
+            <Link href="/solicitacoes" className="hover:opacity-70 transition-opacity">
               Solicitações
             </Link>
             {role !== "SOLICITANTE" && (
-              <Link href="/pendentes" className="hover:text-blue-600">
+              <Link href="/pendentes" className="hover:opacity-70 transition-opacity">
                 Pendentes
               </Link>
             )}
-            <Link href="/veiculo" className="hover:text-blue-600">
+            <Link href="/veiculo" className="hover:opacity-70 transition-opacity">
               Veículo
             </Link>
             {role === "ADMIN" && (
-              <Link href="/usuarios" className="hover:text-blue-600">
+              <Link href="/usuarios" className="hover:opacity-70 transition-opacity">
                 Usuários
               </Link>
             )}
@@ -67,12 +75,9 @@ export default async function DashboardLayout({ children }: LayoutProps) {
         {/* DIREITA */}
         <div className="flex items-center gap-4 text-sm">
           <div className="text-right">
-            <p className="font-medium text-slate-800">{name}</p>
-            <p className="text-slate-500 text-xs">
-              {roleLabels[role] ?? role}
-            </p>
+            <p className="font-semibold" style={{ color: "#1E3A6E" }}>{name}</p>
+            <p className="text-xs text-slate-400">{roleLabels[role] ?? role}</p>
           </div>
-
           <SignOutButton />
         </div>
       </header>
@@ -84,7 +89,6 @@ export default async function DashboardLayout({ children }: LayoutProps) {
         </Suspense>
       </main>
 
-      {/* TOAST GLOBAL */}
       <Toaster position="top-right" richColors />
     </div>
   );
