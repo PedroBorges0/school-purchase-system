@@ -34,51 +34,64 @@ export default async function DashboardLayout({ children }: LayoutProps) {
     <div className="min-h-screen" style={{ backgroundColor: "#F0F2F5" }}>
 
       {/* HEADER */}
-      <header className="bg-white border-b border-slate-200 px-6 py-2 flex items-center justify-between shadow-sm">
+      <header className="bg-white border-b border-slate-200 shadow-sm">
 
-        {/* ESQUERDA — logo + nav */}
-        <div className="flex items-center gap-8">
-          <Link href="/dashboard" className="flex items-center gap-3">
-            <Image
-              src="/logo-conexao.png"
-              alt="Colégio Conexão"
-              width={140}
-              height={48}
-              className="object-contain"
-              priority
-            />
-          </Link>
+        {/* BARRA SUPERIOR COM COR DO CONEXÃO */}
+        <div className="h-1 w-full" style={{ background: "linear-gradient(90deg, #1E3A6E 0%, #2AACAC 100%)" }} />
 
-          <nav className="flex gap-5 text-sm font-medium" style={{ color: "#1E3A6E" }}>
-            <Link href="/dashboard" className="hover:opacity-70 transition-opacity">
-              Dashboard
-            </Link>
-            <Link href="/solicitacoes" className="hover:opacity-70 transition-opacity">
-              Solicitações
-            </Link>
-            {role !== "SOLICITANTE" && (
-              <Link href="/pendentes" className="hover:opacity-70 transition-opacity">
-                Pendentes
-              </Link>
-            )}
-            <Link href="/veiculo" className="hover:opacity-70 transition-opacity">
-              Veículo
-            </Link>
-            {role === "ADMIN" && (
-              <Link href="/usuarios" className="hover:opacity-70 transition-opacity">
-                Usuários
-              </Link>
-            )}
-          </nav>
-        </div>
+        <div className="px-6 py-3 flex items-center justify-between">
 
-        {/* DIREITA */}
-        <div className="flex items-center gap-4 text-sm">
-          <div className="text-right">
-            <p className="font-semibold" style={{ color: "#1E3A6E" }}>{name}</p>
-            <p className="text-xs text-slate-400">{roleLabels[role] ?? role}</p>
+          {/* ESQUERDA — logo grande + nav */}
+          <div className="flex items-center gap-10">
+            <Link href="/dashboard">
+              <Image
+                src="/logo-conexao.png"
+                alt="Colégio Conexão"
+                width={180}
+                height={60}
+                className="object-contain"
+                priority
+              />
+            </Link>
+
+            <nav className="flex gap-6 text-sm font-medium">
+              {[
+                { href: "/dashboard", label: "Dashboard", always: true },
+                { href: "/solicitacoes", label: "Solicitações", always: true },
+                { href: "/pendentes", label: "Pendentes", show: role !== "SOLICITANTE" },
+                { href: "/veiculo", label: "Veículo", always: true },
+                { href: "/usuarios", label: "Usuários", show: role === "ADMIN" },
+              ]
+                .filter((item) => item.always || item.show)
+                .map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="relative py-1 transition-colors hover:text-teal-600"
+                    style={{ color: "#1E3A6E" }}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+            </nav>
           </div>
-          <SignOutButton />
+
+          {/* DIREITA — usuário + sair */}
+          <div className="flex items-center gap-4">
+            <div className="text-right">
+              <p className="text-sm font-semibold" style={{ color: "#1E3A6E" }}>
+                {name}
+              </p>
+              <p className="text-xs text-slate-400">{roleLabels[role] ?? role}</p>
+            </div>
+            <div
+              className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold"
+              style={{ backgroundColor: "#2AACAC" }}
+            >
+              {name.charAt(0).toUpperCase()}
+            </div>
+            <SignOutButton />
+          </div>
         </div>
       </header>
 
