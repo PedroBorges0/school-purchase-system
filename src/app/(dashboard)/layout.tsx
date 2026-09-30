@@ -47,9 +47,10 @@ export default async function DashboardLayout({ children }: LayoutProps) {
               <Image
                 src="/logo-conexao.png"
                 alt="Colégio Conexão"
-                width={180}
-                height={60}
+                width={160}
+                height={54}
                 className="object-contain"
+                style={{ mixBlendMode: "multiply" }}
                 priority
               />
             </Link>

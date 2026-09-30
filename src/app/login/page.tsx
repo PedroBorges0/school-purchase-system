@@ -18,7 +18,6 @@ export default function LoginPage() {
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-
     if (submitting.current) return;
     submitting.current = true;
     setLoading(true);
@@ -47,13 +46,39 @@ export default function LoginPage() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center"
+      className="min-h-screen flex"
       style={{ backgroundColor: "#F0F2F5" }}
     >
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+      {/* PAINEL ESQUERDO — identidade visual */}
+      <div
+        className="hidden lg:flex lg:w-1/2 flex-col items-center justify-center p-12"
+        style={{ background: "linear-gradient(135deg, #1E3A6E 0%, #2AACAC 100%)" }}
+      >
+        <Image
+          src="/logo-conexao.png"
+          alt="Colégio Conexão"
+          width={280}
+          height={100}
+          className="object-contain mb-8"
+          priority
+        />
+        <p className="text-white text-center text-lg font-light opacity-90 max-w-xs leading-relaxed">
+          Sistema de gestão de requisições de compra
+        </p>
+        <div className="mt-12 flex gap-6 text-white opacity-60 text-sm">
+          <span>conecta</span>
+          <span>•</span>
+          <span>ensina</span>
+          <span>•</span>
+          <span>transforma</span>
+        </div>
+      </div>
 
-        {/* Logo */}
-        <div className="flex justify-center mb-8">
+      {/* PAINEL DIREITO — formulário */}
+      <div className="flex-1 flex flex-col items-center justify-center p-8">
+
+        {/* Logo só aparece no mobile (esconde o painel esquerdo) */}
+        <div className="lg:hidden mb-8">
           <Image
             src="/logo-conexao.png"
             alt="Colégio Conexão"
@@ -64,70 +89,65 @@ export default function LoginPage() {
           />
         </div>
 
-        <div className="mb-6">
-          <h1 className="text-xl font-bold text-center" style={{ color: "#1E3A6E" }}>
-            Sistema de Compras
-          </h1>
-          <p className="text-slate-500 text-sm mt-1 text-center">
-            Faça login para acessar sua conta.
-          </p>
-        </div>
-
-        <form onSubmit={handleLogin} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              E-mail
-            </label>
-            <input
-              type="email"
-              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none disabled:opacity-50"
-              style={{ outline: "none" }}
-              onFocus={e => e.target.style.boxShadow = "0 0 0 2px #2AACAC44"}
-              onBlur={e => e.target.style.boxShadow = "none"}
-              placeholder="seu@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={loading}
-              required
-              autoComplete="email"
-            />
+        <div className="w-full max-w-sm">
+          <div className="mb-8">
+            <h1 className="text-2xl font-bold" style={{ color: "#1E3A6E" }}>
+              Bem-vindo de volta
+            </h1>
+            <p className="text-slate-500 text-sm mt-1">
+              Faça login para acessar o sistema de compras.
+            </p>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Senha
-            </label>
-            <input
-              type="password"
-              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none disabled:opacity-50"
-              onFocus={e => e.target.style.boxShadow = "0 0 0 2px #2AACAC44"}
-              onBlur={e => e.target.style.boxShadow = "none"}
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={loading}
-              required
-              autoComplete="current-password"
-            />
-          </div>
-
-          {error && (
-            <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3">
-              <p className="text-sm text-red-700">{error}</p>
+          <form onSubmit={handleLogin} className="space-y-5">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                E-mail
+              </label>
+              <input
+                type="email"
+                className="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm bg-white focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-100 disabled:opacity-50 transition-all"
+                placeholder="seu@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={loading}
+                required
+                autoComplete="email"
+              />
             </div>
-          )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full text-white rounded-lg py-2.5 text-sm font-semibold transition-opacity disabled:opacity-60"
-            style={{ backgroundColor: "#2AACAC" }}
-            onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
-            onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
-          >
-            {loading ? "Entrando..." : "Entrar"}
-          </button>
-        </form>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                Senha
+              </label>
+              <input
+                type="password"
+                className="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm bg-white focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-100 disabled:opacity-50 transition-all"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={loading}
+                required
+                autoComplete="current-password"
+              />
+            </div>
+
+            {error && (
+              <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3">
+                <p className="text-sm text-red-700">{error}</p>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full text-white rounded-xl py-3 text-sm font-semibold transition-all disabled:opacity-60 mt-2"
+              style={{ backgroundColor: "#2AACAC" }}
+            >
+              {loading ? "Entrando..." : "Entrar"}
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );
