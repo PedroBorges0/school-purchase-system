@@ -57,22 +57,21 @@ export default function LoginPage() {
         <Image
           src="/logo-conexao.png"
           alt="Colégio Conexão"
-          width={280}
-          height={100}
-          className="object-contain mb-8"
+          width={360}
+          height={120}
+          className="object-contain"
           priority
         />
-        <p className="text-white text-center text-lg font-light opacity-90 max-w-xs leading-relaxed">
+        <p className="text-white text-center text-base font-light opacity-80 max-w-xs leading-relaxed mt-6">
           Sistema de gestão de requisições de compra
         </p>
-        <div className="mt-12 flex gap-6 text-white opacity-60 text-sm">
+        <div className="mt-8 flex gap-4 text-white opacity-50 text-sm tracking-widest uppercase">
           <span>conecta</span>
           <span>•</span>
           <span>ensina</span>
           <span>•</span>
           <span>transforma</span>
         </div>
-      </div>
 
       {/* PAINEL DIREITO — formulário */}
       <div className="flex-1 flex flex-col items-center justify-center p-8">
