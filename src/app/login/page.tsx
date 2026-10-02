@@ -45,14 +45,13 @@ export default function LoginPage() {
   }
 
   return (
-    <div
-      className="min-h-screen flex"
-      style={{ backgroundColor: "#F0F2F5" }}
-    >
+    <div className="min-h-screen flex" style={{ backgroundColor: "#F0F2F5" }}>
       {/* PAINEL ESQUERDO — identidade visual */}
       <div
         className="hidden lg:flex lg:w-1/2 flex-col items-center justify-center p-12"
-        style={{ background: "linear-gradient(135deg, #1E3A6E 0%, #2AACAC 100%)" }}
+        style={{
+          background: "linear-gradient(135deg, #1E3A6E 0%, #2AACAC 100%)",
+        }}
       >
         <Image
           src="/logo-conexao.png"
@@ -72,10 +71,10 @@ export default function LoginPage() {
           <span>•</span>
           <span>transforma</span>
         </div>
+      </div>
 
       {/* PAINEL DIREITO — formulário */}
       <div className="flex-1 flex flex-col items-center justify-center p-8">
-
         {/* Logo só aparece no mobile (esconde o painel esquerdo) */}
         <div className="lg:hidden mb-8">
           <Image
