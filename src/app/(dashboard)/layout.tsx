@@ -44,15 +44,15 @@ export default async function DashboardLayout({ children }: LayoutProps) {
           {/* ESQUERDA — logo grande + nav */}
           <div className="flex items-center gap-10">
             <Link href="/dashboard">
-              <Image
-                src="/logo-conexao.png"
-                alt="Colégio Conexão"
-                width={160}
-                height={54}
-                className="object-contain"
-                style={{ mixBlendMode: "multiply" }}
-                priority
-              />
+              <div className="relative w-48 h-14">
+                <Image
+                  src="/logo-conexao.png"
+                  alt="Colégio Conexão"
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </div>
             </Link>
 
             <nav className="flex gap-6 text-sm font-medium">

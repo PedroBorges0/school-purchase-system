@@ -53,14 +53,15 @@ export default function LoginPage() {
           background: "linear-gradient(135deg, #1E3A6E 0%, #2AACAC 100%)",
         }}
       >
-        <Image
-          src="/logo-conexao.png"
-          alt="Colégio Conexão"
-          width={360}
-          height={120}
-          className="object-contain"
-          priority
-        />
+        <div className="relative w-80 h-24">
+          <Image
+            src="/logo-conexao.png"
+            alt="Colégio Conexão"
+            fill
+            className="object-contain"
+            priority
+          />
+        </div>
         <p className="text-white text-center text-base font-light opacity-80 max-w-xs leading-relaxed mt-6">
           Sistema de gestão de requisições de compra
         </p>
